@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aviator - BetPawa Style</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f5f5;
+      color: #36fa05;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+   .game-container {
+  background-color: #1e1e2f;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 2px 2px 4px rebeccapurple, -2px -2px 4px rgb(32, 172, 14);
+}
+
+    h1,p {
+      margin-bottom: 20px;
+      color: #28a745; /* BetPawa green */
+    }
+
+    .screen {
+      background-color: #f0f0f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    #multiplier {
+      font-size: 3em;
+      color: #28a745;
+      margin: 0;
+    }
+
+    #status {
+      margin-top: 10px;
+      font-style: italic;
+      color: #666;
+    }
+
+    .stake-input {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .stake-input label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    #stakeAmount {
+      width: 100px;
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    #currentWinnings {
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .controls {
+      margin-top: 10px;
+    }
+
+    .controls button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 1em;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .controls button:hover {
+      background-color: #218838;
+    }
+
+    .result {
+      margin-top: 20px;
+    }
+
+    #resultText {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    @media (max-width: 500px) {
+      .game-container {
+        padding: 20px;
+      }
+
+      #multiplier {
+        font-size: 2.4em;
+      }
+
+      .controls button {
+        width: 100%;
+        margin: 5px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1> Aviator Game</h1>
+    <div class="screen">
+      <p id="multiplier"> ✈️ 1.00x</p>
+      <p id="status">Ready to fly!</p>
+    </div>
+
+    <div class="stake-input">
+    
+     <p id="currentWinnings">0.00 RWF</p>
+      <input type="text" id="stakeAmount" placeholder="1 RWF 💰" min="1">
+    </div>
+
+    <div class="controls">
+      <button onclick="startGame()">Start</button>
+      <button onclick="cashOut()">Cash Out</button>
+    </div>
+
+    <div class="result">
+      <p id="resultText"></p>
+    </div>
+  </div>
+
+  <script>
+    let multiplier = 1.00;
+    let interval;
+    let gameRunning = false;
+    let crashed = false;
+    let stakeAmount = 0;
+
+    function startGame() {
+      if (gameRunning) return;
+
+      const stakeInput = document.getElementById("stakeAmount").value;
+      stakeAmount = parseFloat(stakeInput);
+
+      if (isNaN(stakeAmount) || stakeAmount <= 0) {
+        alert("Please enter a valid stake amount.");
+        return;
+      }
+
+      multiplier = 1.00;
+      crashed = false;
+      gameRunning = true;
+
+      document.getElementById("resultText").textContent = "";
+      document.getElementById("status").textContent = " ✈️ Flying...";
+      document.getElementById("multiplier").textContent = multiplier.toFixed(2) + " ✈️ X";
+      document.getElementById("currentWinnings").textContent = (stakeAmount * multiplier).toFixed(2) + " RWF";
+
+      interval = setInterval(() => {
+        multiplier += 0.05;
+
+        document.getElementById("multiplier").textContent = multiplier.toFixed(2) + "X";
+        document.getElementById("currentWinnings").textContent = (stakeAmount * multiplier).toFixed(2) + " RWF";
+
+        let crashChance = Math.random();
+        if (crashChance < 0.01 + multiplier / 500) {
+          crash();
+        }
+      }, 300); // slower to make it more natural
+    }
+
+    function cashOut() {
+      if (!gameRunning || crashed) return;
+      clearInterval(interval);
+      gameRunning = false;
+
+      const winnings = stakeAmount * multiplier;
+      document.getElementById("status").textContent = "✅ You cashed out!";
+      document.getElementById("resultText").textContent = "You won: " + winnings.toFixed(2) + " RWF";
+    }
+
+    function crash() {
+      clearInterval(interval);
+      crashed = true;
+      gameRunning = false;
+
+      document.getElementById("status").textContent = "💥 Crashed at " + multiplier.toFixed(2) + "x";
+      document.getElementById("resultText").textContent = "❌ You lost " + stakeAmount.toFixed(2) + " RWF";
+      document.getElementById("currentWinnings").textContent = "0.00 RWF";
+    }
+  </script>
+</body>
+</html>
